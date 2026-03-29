@@ -24,9 +24,8 @@ SyncSpace는 조직 내부에서 파일을 안전하고 효율적으로 저장, 
 ## 과제 결과물 위치
 
 - **프로젝트 I 제안서**: `doc/proposal.md`
-- **프로젝트 II 품질 요소 추정서**: `doc/quality_attributes.md`
+- **프로젝트 II 품질 요소 추정서**: `doc/project2.md`
 - **프로젝트 설명 문서**: `README.md`
-- **소스 코드 디렉토리**: `src/`
 
 추후 과제가 추가되면 해당 결과물 위치도 이 README에 계속 업데이트할 예정입니다.
 
@@ -38,7 +37,6 @@ SyncSpace는 조직 내부에서 파일을 안전하고 효율적으로 저장, 
 se/
 ├── README.md
 ├── doc/
-│   ├── proposal.md
-│   └── quality_attributes.md
-└── src/
-    └── .gitkeep
+    ├── proposal.md
+    └── project2.md
+
