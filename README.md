@@ -33,16 +33,16 @@ SyncSpace는 조직 내부에서 파일을 안전하고 효율적으로 저장, 
 
 ## 과제 결과물 위치
 
-소프트웨어공학 과제 결과물은 아래 위치에서 확인할 수 있습니다.  
+소프트웨어공학 과제 결과물은 아래 위치에서 확인할 수 있습니다.
 
 - **프로젝트 I 제안서**: `doc/proposal.md`
 - **프로젝트 II 품질 요소 추정서**: `doc/project2.md`
 - **프로젝트 III 프로젝트 관리 계획서**: `doc/project_plan.md`
+- **프로젝트 IV 요구사항 정의서**: `doc/requirements.md`
 - **프로젝트 설명 문서**: `README.md`
 
 추후 아래 산출물이 추가되면 README에도 계속 반영합니다.
 
-- **요구사항 정의서**: `doc/requirements.md`
 - **요구사항 분석서**: `doc/requirements_analysis.md`
 - **소프트웨어 설계서**: `doc/software_design.md`
 
@@ -56,5 +56,8 @@ se/
 ├── doc/
 │   ├── proposal.md
 │   ├── project2.md
-│   └── project_plan.md
+│   ├── project_plan.md
+│   ├── requirements.md
+│   ├── requirements_analysis.md      # 추후 추가
+│   └── software_design.md            # 추후 추가
 └── src/
