@@ -16,6 +16,7 @@
 | 1.1 | 2026-05-09 | 최민서 | 유스케이스 설명 형식 보완, U_13 추가, Actor 설명 보완 | 수정 |
 | 1.2 | 2026-05-09 | 최민서 | Use Case Diagram 분리, 클래스 관계 수정, 정적 분석 보완, 시퀀스 예외 흐름 추가 | 수정 |
 | 1.3 | 2026-05-09 | 최민서 | 관리자 정책 관리 Subflow 보완, 주요 시퀀스 다이어그램 예외 흐름 추가 | 수정 |
+| 1.4 | 2026-05-09 | 최민서 | Mermaid Sequence Diagram 렌더링 오류 수정 | 수정 |
 
 ---
 
@@ -1641,7 +1642,7 @@ sequenceDiagram
     actor User as 사용자
     participant UI as 외부 공유 화면
     participant Policy as Policy
-    participant Link as ShareLink
+    participant Share as ShareLink
     participant DB as 데이터베이스
     participant Log as AccessLog
 
@@ -1650,17 +1651,17 @@ sequenceDiagram
     Policy-->>UI: 정책 결과 반환
 
     alt 외부 공유 허용
-        UI->>Link: 링크 생성 요청
-        Link->>DB: 링크 정보 저장
-        DB-->>Link: 저장 결과 반환
-        Link-->>UI: 생성된 URL 반환
+        UI->>Share: 링크 생성 요청
+        Share->>DB: 링크 정보 저장
+        DB-->>Share: 저장 결과 반환
+        Share-->>UI: 생성된 URL 반환
         UI->>Log: 링크 생성 로그 기록
         UI-->>User: 외부 링크 표시
     else 외부 공유 정책상 차단
         UI->>Log: 외부 링크 생성 실패 로그 기록
         UI-->>User: 외부 공유 불가 메시지 출력
     else 링크 정보 저장 실패
-        Link-->>UI: 링크 생성 실패 반환
+        Share-->>UI: 링크 생성 실패 반환
         UI-->>User: 링크 생성 실패 메시지 출력
     end
 ```
@@ -1785,18 +1786,18 @@ sequenceDiagram
 sequenceDiagram
     actor ExternalUser as 외부 사용자
     participant LinkUI as 외부 링크 접근 화면
-    participant Link as ShareLink
+    participant Share as ShareLink
     participant Policy as Policy
     participant Storage as 파일 저장소
     participant Log as AccessLog
 
     ExternalUser->>LinkUI: 공유 링크 접속
-    LinkUI->>Link: 링크 정보 조회
-    Link->>Policy: 링크 만료 및 정책 확인
-    Policy-->>Link: 접근 가능 여부 반환
+    LinkUI->>Share: 링크 정보 조회
+    Share->>Policy: 링크 만료 및 정책 확인
+    Policy-->>Share: 접근 가능 여부 반환
 
     alt 링크가 유효하고 다운로드 허용
-        Link->>Storage: 파일 원본 요청
+        Share->>Storage: 파일 원본 요청
         Storage-->>LinkUI: 파일 미리보기/다운로드 데이터 반환
         LinkUI->>Log: 외부 링크 접근 로그 기록
         LinkUI-->>ExternalUser: 파일 미리보기 또는 다운로드 화면 제공
@@ -1804,7 +1805,7 @@ sequenceDiagram
         LinkUI->>Log: 실패한 외부 링크 접근 로그 기록
         LinkUI-->>ExternalUser: 접근 불가 메시지 출력
     else 다운로드 미허용
-        Link->>Storage: 미리보기 데이터 요청
+        Share->>Storage: 미리보기 데이터 요청
         Storage-->>LinkUI: 파일 미리보기 데이터 반환
         LinkUI->>Log: 외부 링크 미리보기 로그 기록
         LinkUI-->>ExternalUser: 미리보기 화면 제공 및 다운로드 비활성화
