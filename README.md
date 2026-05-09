@@ -39,11 +39,11 @@ SyncSpace는 조직 내부에서 파일을 안전하고 효율적으로 저장, 
 - **프로젝트 II 품질 요소 추정서**: [doc/project2.md](./doc/project2.md)
 - **프로젝트 III 프로젝트 관리 계획서**: [doc/project_plan.md](./doc/project_plan.md)
 - **프로젝트 IV 요구사항 정의서**: [doc/requirements.md](./doc/requirements.md)
+- **프로젝트 VII 요구사항 분석서**: [doc/requirements_analysis.md](./doc/requirements_analysis.md)
 - **프로젝트 설명 문서**: [README.md](./README.md)
 
 추후 아래 산출물이 추가되면 README에도 계속 반영합니다.
 
-- **요구사항 분석서**: `doc/requirements_analysis.md` 예정
 - **소프트웨어 설계서**: `doc/software_design.md` 예정
 
 ---
@@ -58,7 +58,6 @@ se/
 │   ├── project2.md
 │   ├── project_plan.md
 │   ├── requirements.md
-│   ├── requirements_analysis.md      # 추후 추가
+│   ├── requirements_analysis.md
 │   └── software_design.md            # 추후 추가
 └── src/
-```
