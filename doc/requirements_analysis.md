@@ -17,6 +17,7 @@
 | 1.2 | 2026-05-09 | 최민서 | Use Case Diagram 분리, 클래스 관계 수정, 정적 분석 보완, 시퀀스 예외 흐름 추가 | 수정 |
 | 1.3 | 2026-05-09 | 최민서 | 관리자 정책 관리 Subflow 보완, 주요 시퀀스 다이어그램 예외 흐름 추가 | 수정 |
 | 1.4 | 2026-05-09 | 최민서 | Mermaid Sequence Diagram 렌더링 오류 수정 | 수정 |
+| 1.5 | 2026-05-16 | 최민서 | CRC 카드와 클래스 다이어그램 간 FileMetadata-Folder 관계 일관성 보완 | 수정 |
 
 ---
 
@@ -1031,6 +1032,7 @@ classDiagram
 
     Folder "1" --> "0..*" File
     Folder "1" --> "0..*" Folder
+    Folder "1" --> "0..*" FileMetadata : contains metadata
 
     File "1" --> "1" FileMetadata
     File "1" --> "0..*" FileVersion
@@ -1169,6 +1171,7 @@ classDiagram
 | 폴더 삭제 | User |
 | 파일 포함 | File |
 | 하위 폴더 포함 | Folder |
+| 폴더 기준 파일 위치 정보 제공 | FileMetadata |
 
 **Attributes**
 
@@ -1181,7 +1184,7 @@ classDiagram
 
 - Generalization: 없음
 - Aggregation: File, Folder
-- Other Associations: User, Permission
+- Other Associations: User, Permission, FileMetadata
 
 ---
 
