@@ -19,6 +19,7 @@
 | 1.4 | 2026-05-09 | 최민서 | Mermaid Sequence Diagram 렌더링 오류 수정 | 수정 |
 | 1.5 | 2026-05-16 | 최민서 | CRC 카드와 클래스 다이어그램 간 FileMetadata-Folder 관계 일관성 보완 | 수정 |
 | 1.6 | 2026-05-18 | 최민서 | FileMetadata 및 FileVersion CRC 카드의 Aggregation 관계 모순 수정 | 수정 |
+| 1.7 | 2026-05-18 | 최민서 | Actor와 내부 구성요소 구분, 요구사항 추적표 설계 요소 연결, 3.3.7 시퀀스 다이어그램 렌더링 오류 수정 | 수정 |
 
 ---
 
@@ -54,13 +55,13 @@
 
 본 문서의 범위는 다음과 같다.
 
-1. SyncSpace 시스템의 사용자와 외부 시스템을 식별한다.
+1. SyncSpace 시스템의 사용자 Actor와 내부/연동 구성요소를 구분하여 식별한다.
 2. 주요 기능을 유스케이스 단위로 분석한다.
 3. 유스케이스별 정상 흐름과 예외 흐름을 정의한다.
 4. 시스템을 구성하는 주요 클래스를 식별한다.
 5. CRC 카드를 통해 각 클래스의 책임과 협력 객체를 정의한다.
 6. 주요 기능의 동적 흐름을 순차적으로 분석한다.
-7. 요구사항과 유스케이스 간 추적성을 정리한다.
+7. 요구사항과 유스케이스, 관련 클래스, 주요 인터페이스 간 추적성을 정리한다.
 
 ---
 
@@ -134,18 +135,26 @@ flowchart LR
 
 ## 2.2 Actor Table
 
-본 문서에서는 사용자 역할뿐 아니라 SyncSpace와 상호작용하는 외부 시스템 및 저장 구성요소도 Actor로 식별한다.
+본 문서에서는 UML 관점에서 시스템 외부에서 SyncSpace와 상호작용하며 특정 목표를 수행하는 주체만 Actor로 식별한다. 따라서 사용자, 관리자, 외부 사용자는 Actor로 정의하고, 데이터베이스, 파일 저장소, 인증 시스템은 Actor가 아니라 시스템이 기능 수행 과정에서 사용하는 내부/연동 구성요소로 분리하여 설명한다.
 
 | Actor | Role |
 |---|---|
 | 사용자 | SyncSpace의 일반 사용자로, 파일 업로드, 다운로드, 검색, 폴더 관리, 공유, 버전 복원, 삭제 파일 복구 기능을 사용한다. |
 | 관리자 | SyncSpace의 운영자로, 사용자 계정, 권한, 저장 공간, 외부 공유 정책, 접근 로그를 관리한다. |
 | 외부 사용자 | 외부 링크를 통해 공유된 파일에 접근하는 시스템 외부 사용자이다. |
-| 인증 시스템 | 사용자 로그인과 권한 확인을 처리한다. |
-| 데이터베이스 | 사용자 정보, 파일 메타데이터, 권한 정보, 버전 이력, 접근 로그를 저장하고 조회한다. |
-| 파일 저장소 | 사용자가 업로드한 실제 파일 데이터를 저장하고 제공한다. |
 
----
+### 2.2.1 내부/연동 구성요소 Table
+
+아래 구성요소는 사용자의 목표를 직접 수행하는 Actor가 아니라 SyncSpace 내부에서 기능 처리를 지원하거나 시스템과 연동되는 구성요소이다. 따라서 Use Case Diagram에서는 Actor로 표현하지 않고, 소프트웨어 컨텍스트, 동적 분석, 인터페이스 분석에서 처리 흐름과 연동 책임을 설명한다.
+
+| 구성요소 | 구분 | 설명 |
+|---|---|---|
+| 인증 시스템 | 내부/연동 구성요소 | 사용자 로그인, 세션 관리, 권한 확인을 처리한다. |
+| 데이터베이스 | 내부 구성요소 | 사용자 정보, 파일 메타데이터, 권한 정보, 버전 이력, 접근 로그를 저장하고 조회한다. |
+| 파일 저장소 | 내부 구성요소 | 사용자가 업로드한 실제 파일 원본과 이전 버전 파일을 저장하고 제공한다. |
+| StorageService | 내부 서비스 인터페이스 | 파일 업로드, 다운로드, 삭제, 이전 버전 파일 조회를 처리하는 저장소 접근 인터페이스이다. |
+| AuthService | 내부 서비스 인터페이스 | 로그인 인증과 권한 검증을 처리하는 인증/인가 인터페이스이다. |
+| ShareLinkService | 내부 서비스 인터페이스 | 외부 링크 생성, 만료 검증, 다운로드 허용 여부 확인을 처리하는 공유 링크 인터페이스이다. |
 
 ## 2.3 Use Case Diagram
 
@@ -183,20 +192,12 @@ flowchart TB
     User --- U09
     User --- U10
 
-    Auth[인증 시스템] --- U02
-    DB[(데이터베이스)] --- U01
-    DB --- U03
-    DB --- U06
-    Storage[(파일 저장소)] --- U03
-    Storage --- U04
-    Storage --- U09
-    Storage --- U10
-
     U03 -. include .-> U03A
     U03 -. extend .-> U03B
     U08 -. include .-> U08A
     U08 -. include .-> U08B
 ```
+
 
 ### 2.3.2 관리자 기능 Use Case Diagram
 
@@ -216,10 +217,6 @@ flowchart TB
     Admin[관리자] --- U11
     Admin --- U12
 
-    DB[(데이터베이스)] --- U11
-    DB --- U12
-    Auth[인증 시스템] --- U11
-
     U11 -. include .-> U11A
     U11 -. include .-> U11B
     U11 -. include .-> U11C
@@ -227,6 +224,7 @@ flowchart TB
     U12 -. include .-> U12A
     U12 -. extend .-> U12B
 ```
+
 
 ### 2.3.3 외부 사용자 기능 Use Case Diagram
 
@@ -240,13 +238,12 @@ flowchart TB
     end
 
     ExternalUser[외부 사용자] --- U13
-    Storage[(파일 저장소)] --- U13
-    DB[(데이터베이스)] --- U13
 
     U13 -. include .-> U13A
     U13 -. include .-> U13B
     U13 -. include .-> U13C
 ```
+
 
 ---
 
@@ -266,7 +263,7 @@ flowchart TB
 | Use Case Type | Detail, Essential |
 | Brief Description | 사용자가 SyncSpace를 이용하기 위해 계정을 생성하는 기능이다. |
 | Trigger | 사용자가 회원가입 버튼을 누른다. |
-| Relationships | Association: 사용자, 데이터베이스 / Include: 없음 / Extend: 없음 / Generalization: 없음 |
+| Relationships | Association: 사용자 / Related Components: 데이터베이스 / Include: 없음 / Extend: 없음 / Generalization: 없음 |
 
 **Stakeholders and Interests**
 
@@ -306,7 +303,7 @@ flowchart TB
 | Use Case Type | Detail, Essential |
 | Brief Description | 사용자가 아이디와 비밀번호를 입력하여 SyncSpace에 접속하는 기능이다. |
 | Trigger | 사용자가 로그인 버튼을 누른다. |
-| Relationships | Association: 사용자, 인증 시스템, 데이터베이스 / Include: 없음 / Extend: 없음 / Generalization: 없음 |
+| Relationships | Association: 사용자 / Related Components: 인증 시스템, 데이터베이스 / Include: 없음 / Extend: 없음 / Generalization: 없음 |
 
 **Stakeholders and Interests**
 
@@ -355,7 +352,7 @@ S-2: 로그인 실패
 | Use Case Type | Detail, Essential |
 | Brief Description | 사용자가 문서, 이미지, PDF, 압축 파일, 영상 파일, 데이터 파일 등을 SyncSpace에 업로드하는 기능이다. |
 | Trigger | 사용자가 파일 업로드 버튼을 누른다. |
-| Relationships | Association: 사용자, 파일 저장소, 데이터베이스 / Include: 업로드 진행 상태를 확인한다 / Extend: 업로드를 재시도하거나 이어올리기 한다 / Generalization: 없음 |
+| Relationships | Association: 사용자 / Related Components: 파일 저장소, 데이터베이스 / Include: 업로드 진행 상태를 확인한다 / Extend: 업로드를 재시도하거나 이어올리기 한다 / Generalization: 없음 |
 
 **Stakeholders and Interests**
 
@@ -407,7 +404,7 @@ S-2: 업로드 재시도 또는 이어올리기
 | Use Case Type | Detail, Essential |
 | Brief Description | 사용자가 SyncSpace에 저장된 파일을 다운로드하는 기능이다. |
 | Trigger | 사용자가 파일 목록에서 다운로드 버튼을 누른다. |
-| Relationships | Association: 사용자, 파일 저장소, 데이터베이스 / Include: 권한을 확인한다 / Extend: 없음 / Generalization: 없음 |
+| Relationships | Association: 사용자 / Related Components: 파일 저장소, 데이터베이스 / Include: 권한을 확인한다 / Extend: 없음 / Generalization: 없음 |
 
 **Stakeholders and Interests**
 
@@ -446,7 +443,7 @@ S-2: 업로드 재시도 또는 이어올리기
 | Use Case Type | Detail, Essential |
 | Brief Description | 사용자가 폴더를 생성, 수정, 삭제하고 파일을 이동하거나 이름을 변경하는 기능이다. |
 | Trigger | 사용자가 폴더 생성, 파일 이동, 이름 변경, 삭제 버튼을 누른다. |
-| Relationships | Association: 사용자, 데이터베이스, 파일 저장소 / Include: 권한을 확인한다 / Extend: 삭제 파일을 복구한다 / Generalization: 없음 |
+| Relationships | Association: 사용자 / Related Components: 데이터베이스, 파일 저장소 / Include: 권한을 확인한다 / Extend: 삭제 파일을 복구한다 / Generalization: 없음 |
 
 **Stakeholders and Interests**
 
@@ -500,7 +497,7 @@ S-3: 파일 또는 폴더 삭제
 | Use Case Type | Detail, Essential |
 | Brief Description | 사용자가 파일명, 파일 유형, 업로드 날짜, 업로더 등을 기준으로 파일을 검색하는 기능이다. |
 | Trigger | 사용자가 검색어 또는 검색 조건을 입력하고 검색 버튼을 누른다. |
-| Relationships | Association: 사용자, 데이터베이스 / Include: 권한을 확인한다 / Extend: 없음 / Generalization: 없음 |
+| Relationships | Association: 사용자 / Related Components: 데이터베이스 / Include: 권한을 확인한다 / Extend: 없음 / Generalization: 없음 |
 
 **Stakeholders and Interests**
 
@@ -540,7 +537,7 @@ S-3: 파일 또는 폴더 삭제
 | Use Case Type | Detail, Essential |
 | Brief Description | 사용자가 특정 내부 사용자에게 파일 또는 폴더를 공유하는 기능이다. |
 | Trigger | 사용자가 파일 또는 폴더의 공유 버튼을 누른다. |
-| Relationships | Association: 사용자, 데이터베이스, 인증 시스템 / Include: 권한을 확인한다 / Extend: 없음 / Generalization: 없음 |
+| Relationships | Association: 사용자 / Related Components: 데이터베이스, 인증 시스템 / Include: 권한을 확인한다 / Extend: 없음 / Generalization: 없음 |
 
 **Stakeholders and Interests**
 
@@ -582,7 +579,7 @@ S-3: 파일 또는 폴더 삭제
 | Use Case Type | Detail, Essential |
 | Brief Description | 사용자가 외부 링크를 생성하여 시스템 외부 사용자에게 파일을 공유하는 기능이다. |
 | Trigger | 사용자가 외부 링크 생성 버튼을 누른다. |
-| Relationships | Association: 사용자, 외부 사용자, 데이터베이스 / Include: 링크 만료 기간을 설정한다, 다운로드 허용 여부를 설정한다 / Extend: 만료된 링크 접근을 차단한다 / Generalization: 없음 |
+| Relationships | Association: 사용자, 외부 사용자 / Related Components: 데이터베이스 / Include: 링크 만료 기간을 설정한다, 다운로드 허용 여부를 설정한다 / Extend: 만료된 링크 접근을 차단한다 / Generalization: 없음 |
 
 **Stakeholders and Interests**
 
@@ -633,7 +630,7 @@ S-2: 다운로드 허용 여부 설정
 | Use Case Type | Detail, Essential |
 | Brief Description | 사용자가 파일의 이전 버전 목록을 확인하고 특정 버전을 다운로드하거나 복원하는 기능이다. |
 | Trigger | 사용자가 파일의 버전 관리 버튼을 누른다. |
-| Relationships | Association: 사용자, 데이터베이스, 파일 저장소 / Include: 권한을 확인한다 / Extend: 없음 / Generalization: 없음 |
+| Relationships | Association: 사용자 / Related Components: 데이터베이스, 파일 저장소 / Include: 권한을 확인한다 / Extend: 없음 / Generalization: 없음 |
 
 **Stakeholders and Interests**
 
@@ -675,7 +672,7 @@ S-2: 다운로드 허용 여부 설정
 | Use Case Type | Detail, Essential |
 | Brief Description | 사용자가 삭제된 파일을 일정 기간 내에 복구하는 기능이다. |
 | Trigger | 사용자가 휴지통 또는 삭제 파일 목록에 접속한다. |
-| Relationships | Association: 사용자, 파일 저장소, 데이터베이스 / Include: 권한을 확인한다 / Extend: 없음 / Generalization: 없음 |
+| Relationships | Association: 사용자 / Related Components: 파일 저장소, 데이터베이스 / Include: 권한을 확인한다 / Extend: 없음 / Generalization: 없음 |
 
 **Stakeholders and Interests**
 
@@ -715,7 +712,7 @@ S-2: 다운로드 허용 여부 설정
 | Use Case Type | Detail, Essential |
 | Brief Description | 관리자가 사용자 계정과 권한을 조회하고 변경하는 기능이다. |
 | Trigger | 관리자가 관리자 화면에서 사용자 관리 메뉴를 선택한다. |
-| Relationships | Association: 관리자, 데이터베이스, 인증 시스템 / Include: 사용자 조회, 권한 변경, 저장 공간 정책 관리, 외부 공유 정책 관리 / Extend: 계정 비활성화 / Generalization: 없음 |
+| Relationships | Association: 관리자 / Related Components: 데이터베이스, 인증 시스템 / Include: 사용자 조회, 권한 변경, 저장 공간 정책 관리, 외부 공유 정책 관리 / Extend: 계정 비활성화 / Generalization: 없음 |
 
 **Stakeholders and Interests**
 
@@ -777,7 +774,7 @@ S-4: 외부 공유 정책 관리
 | Use Case Type | Detail, Essential |
 | Brief Description | 관리자가 파일 접근, 다운로드, 공유, 권한 변경 등의 로그를 확인하는 기능이다. |
 | Trigger | 관리자가 접근 로그 메뉴를 선택한다. |
-| Relationships | Association: 관리자, 데이터베이스 / Include: 로그 조회 / Extend: 로그 필터링 / Generalization: 없음 |
+| Relationships | Association: 관리자 / Related Components: 데이터베이스 / Include: 로그 조회 / Extend: 로그 필터링 / Generalization: 없음 |
 
 **Stakeholders and Interests**
 
@@ -824,7 +821,7 @@ S-2: 로그 필터링
 | Use Case Type | Detail, Essential |
 | Brief Description | 외부 사용자가 공유 링크를 통해 파일에 접근하는 기능이다. |
 | Trigger | 외부 사용자가 공유받은 링크를 클릭한다. |
-| Relationships | Association: 외부 사용자, ShareLink, 파일 저장소 / Include: 링크 유효성 확인, 다운로드 허용 여부 확인 / Extend: 없음 / Generalization: 없음 |
+| Relationships | Association: 외부 사용자 / Related Components: ShareLinkService, 파일 저장소 / Include: 링크 유효성 확인, 다운로드 허용 여부 확인 / Extend: 없음 / Generalization: 없음 |
 
 **Stakeholders and Interests**
 
@@ -1644,29 +1641,32 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     actor User as 사용자
-    participant UI as 외부 공유 화면
-    participant Policy as Policy
-    participant Share as ShareLink
+    participant UI as 외부공유화면
+    participant PolicyObj as Policy
+    participant ShareLinkObj as ShareLink
     participant DB as 데이터베이스
-    participant Log as AccessLog
+    participant AccessLogObj as AccessLog
 
     User->>UI: 외부 링크 생성 요청
-    UI->>Policy: 외부 공유 허용 여부 확인
-    Policy-->>UI: 정책 결과 반환
+    UI->>PolicyObj: 외부 공유 허용 여부 확인
+    PolicyObj-->>UI: 정책 결과 반환
 
     alt 외부 공유 허용
-        UI->>Share: 링크 생성 요청
-        Share->>DB: 링크 정보 저장
-        DB-->>Share: 저장 결과 반환
-        Share-->>UI: 생성된 URL 반환
-        UI->>Log: 링크 생성 로그 기록
-        UI-->>User: 외부 링크 표시
+        UI->>ShareLinkObj: 링크 생성 요청
+        ShareLinkObj->>DB: 링크 정보 저장
+        DB-->>ShareLinkObj: 저장 결과 반환
+
+        alt 링크 정보 저장 성공
+            ShareLinkObj-->>UI: 생성된 URL 반환
+            UI->>AccessLogObj: 링크 생성 로그 기록
+            UI-->>User: 외부 링크 표시
+        else 링크 정보 저장 실패
+            ShareLinkObj-->>UI: 링크 생성 실패 반환
+            UI-->>User: 링크 생성 실패 메시지 출력
+        end
     else 외부 공유 정책상 차단
-        UI->>Log: 외부 링크 생성 실패 로그 기록
+        UI->>AccessLogObj: 외부 링크 생성 실패 로그 기록
         UI-->>User: 외부 공유 불가 메시지 출력
-    else 링크 정보 저장 실패
-        Share-->>UI: 링크 생성 실패 반환
-        UI-->>User: 링크 생성 실패 메시지 출력
     end
 ```
 
@@ -1841,13 +1841,16 @@ sequenceDiagram
 
 ## 4.2 시스템 인터페이스
 
-| 인터페이스 | 설명 |
-|---|---|
-| 인증 시스템 인터페이스 | 로그인, 세션 관리, 권한 확인을 처리한다. |
-| 데이터베이스 인터페이스 | 사용자 정보, 파일 메타데이터, 권한 정보, 버전 이력, 접근 로그를 저장하고 조회한다. |
-| 파일 저장소 인터페이스 | 업로드된 파일 원본을 저장하고 다운로드 요청 시 파일을 제공한다. |
-| 외부 링크 검증 인터페이스 | 외부 링크의 유효성, 만료 기간, 다운로드 허용 여부를 확인한다. |
-| 로그 관리 인터페이스 | 파일 접근, 다운로드, 공유, 권한 변경 이벤트를 기록하고 조회한다. |
+| 인터페이스 | 관련 내부 구성요소 | 설명 |
+|---|---|---|
+| AuthService | 인증 시스템 | 로그인, 세션 관리, 권한 확인을 처리한다. |
+| UserRepository | 데이터베이스 | 사용자 계정 정보와 권한 정보를 저장하고 조회한다. |
+| MetadataRepository | 데이터베이스 | 파일 메타데이터, 폴더 위치 정보, 검색 조건을 저장하고 조회한다. |
+| StorageService | 파일 저장소 | 업로드된 파일 원본 저장, 다운로드 파일 제공, 이전 버전 파일 조회를 처리한다. |
+| ShareLinkService | 데이터베이스, 파일 저장소 | 외부 링크 생성, 링크 유효성 검증, 만료 기간 확인, 다운로드 허용 여부 확인을 처리한다. |
+| VersionService | 데이터베이스, 파일 저장소 | 파일 버전 목록 조회, 이전 버전 다운로드, 특정 버전 복원을 처리한다. |
+| AccessLogService | 데이터베이스 | 파일 접근, 다운로드, 공유, 권한 변경, 외부 링크 접근 이벤트를 기록하고 조회한다. |
+| PolicyService | 데이터베이스 | 저장 공간 정책, 외부 공유 정책, 삭제 파일 보관 기간 정책을 조회하고 적용한다. |
 
 ---
 
@@ -1870,62 +1873,64 @@ sequenceDiagram
 
 # 6. 요구사항 추적표
 
-| 요구사항 ID | 요구사항 내용 요약 | 관련 Use Case |
-|---|---|---|
-| FR-001 | 회원가입 기능 | U_01 |
-| FR-002 | 로그인 기능 | U_02 |
-| FR-003 | 로그인 사용자만 주요 기능 접근 | U_02 |
-| FR-004 | 사용자 계정 정보 확인 | U_01, U_02 |
-| FR-005 | 관리자 사용자 계정 조회 | U_11 |
-| FR-006 | 다양한 유형의 파일 업로드 | U_03 |
-| FR-007 | 업로드된 파일 다운로드 | U_04 |
-| FR-008 | 파일 메타데이터 저장 | U_03, U_06 |
-| FR-009 | 대용량 파일 업로드 지원 | U_03 |
-| FR-010 | 업로드 진행 상태 확인 | U_03 |
-| FR-011 | 업로드 재시도 또는 이어올리기 | U_03 |
-| FR-012 | 폴더 생성 | U_05 |
-| FR-013 | 폴더 이름 수정 | U_05 |
-| FR-014 | 폴더 삭제 | U_05 |
-| FR-015 | 파일 폴더 간 이동 | U_05 |
-| FR-016 | 파일명 변경 | U_05 |
-| FR-017 | 다단계 폴더 구조 지원 | U_05 |
-| FR-018 | 파일명 기준 검색 | U_06 |
-| FR-019 | 파일 유형 기준 검색 | U_06 |
-| FR-020 | 업로드 날짜 기준 검색 | U_06 |
-| FR-021 | 업로더 기준 검색 | U_06 |
-| FR-022 | 검색 결과 목록 제공 | U_06 |
-| FR-023 | 검색 결과에서 파일 위치와 기본 정보 확인 | U_06 |
-| FR-024 | 내부 사용자에게 파일 또는 폴더 공유 | U_07 |
-| FR-025 | 보기, 수정 권한 구분 | U_07, U_11 |
-| FR-026 | 외부 링크 생성 | U_08 |
-| FR-027 | 외부 링크 만료 기간 설정 | U_08, U_13 |
-| FR-028 | 외부 링크 다운로드 허용 여부 설정 | U_08, U_13 |
-| FR-029 | 만료된 외부 링크 접근 차단 | U_13 |
-| FR-030 | 파일 수정 이력 기반 버전 저장 | U_09 |
-| FR-031 | 이전 버전 목록 확인 | U_09 |
-| FR-032 | 이전 버전 다운로드 | U_09 |
-| FR-033 | 이전 버전으로 복원 | U_09 |
-| FR-034 | 삭제 파일 일정 기간 복구 | U_10 |
-| FR-035 | 사용자 권한 설정 및 변경 | U_11 |
-| FR-036 | 저장 공간 및 공유 정책 관리 | U_11 |
-| FR-037 | 외부 링크 공유 정책 통제 | U_08, U_11, U_13 |
-| FR-038 | 권한 없는 사용자 접근 차단 | U_02, U_04, U_05, U_06, U_07, U_08, U_09, U_10, U_13 |
-| FR-039 | 파일 접근 및 공유 로그 기록 | U_04, U_07, U_08, U_11, U_12, U_13 |
-| NFR-004 | 검색 결과 2초 이내 표시 | U_06 |
-| NFR-005 | 다운로드 요청 후 3초 이내 전송 시작 | U_04, U_13 |
-| NFR-007 | 대용량 업로드 진행률 1초 이내 갱신 | U_03 |
-| NFR-008 | 업로드 성공률 99% 이상 목표 | U_03 |
-| NFR-009 | 삭제 파일 30일 이내 복구 가능 | U_10 |
-| NFR-010 | 이전 버전 복원 성공률 95% 이상 | U_09 |
-| NFR-012 | 권한 없는 사용자 접근 성공률 0% | U_02, U_04, U_05, U_06, U_07, U_08, U_09, U_10, U_13 |
-| NFR-013 | 외부 공유 링크 100% 만료 처리 | U_08, U_13 |
-| IR-001 | 웹 브라우저 기반 UI 제공 | U_01~U_13 |
-| IR-003 | 업로드 진행률 표시 UI 제공 | U_03 |
-| IR-004 | 검색 결과 목록 UI 제공 | U_06 |
-| IR-006 | 관리자 전용 UI 제공 | U_11, U_12 |
-| IR-007 | 데이터베이스 연동 | U_01~U_13 |
-| IR-009 | 외부 링크 URL 생성 및 검증 | U_08, U_13 |
-| IR-010 | 업로드, 다운로드, 검색, 공유 서버 인터페이스 | U_03, U_04, U_06, U_07, U_08, U_13 |
+요구사항 추적표는 요구사항이 유스케이스에서 끝나는 것이 아니라, 분석 단계에서 도출한 주요 클래스와 시스템 인터페이스까지 연결되도록 확장하였다. 이를 통해 각 요구사항이 어떤 설계 요소와 구현 인터페이스로 이어지는지 확인할 수 있다.
+
+| 요구사항 ID | 요구사항 내용 요약 | 관련 Use Case | 관련 클래스 | 주요 인터페이스 |
+|---|---|---|---|---|
+| FR-001 | 회원가입 기능 | U_01 | User | 회원가입 화면, AuthService, UserRepository |
+| FR-002 | 로그인 기능 | U_02 | User | 로그인 화면, AuthService, UserRepository |
+| FR-003 | 로그인 사용자만 주요 기능 접근 | U_02 | User, Permission | AuthService |
+| FR-004 | 사용자 계정 정보 확인 | U_01, U_02 | User | UserRepository, AuthService |
+| FR-005 | 관리자 사용자 계정 조회 | U_11 | Admin, User | 관리자 화면, UserRepository |
+| FR-006 | 다양한 유형의 파일 업로드 | U_03 | File, FileMetadata, Storage | 파일 업로드 화면, StorageService, MetadataRepository |
+| FR-007 | 업로드된 파일 다운로드 | U_04 | File, Permission, Storage, AccessLog | 파일 목록 화면, StorageService, AccessLogService |
+| FR-008 | 파일 메타데이터 저장 | U_03, U_06 | FileMetadata, File, Folder | MetadataRepository |
+| FR-009 | 대용량 파일 업로드 지원 | U_03 | File, FileMetadata, Storage, Policy | 파일 업로드 화면, StorageService, PolicyService |
+| FR-010 | 업로드 진행 상태 확인 | U_03 | File, Storage | 파일 업로드 화면, StorageService |
+| FR-011 | 업로드 재시도 또는 이어올리기 | U_03 | File, Storage | 파일 업로드 화면, StorageService |
+| FR-012 | 폴더 생성 | U_05 | Folder, Permission | 폴더 관리 화면, MetadataRepository |
+| FR-013 | 폴더 이름 수정 | U_05 | Folder, Permission | 폴더 관리 화면, MetadataRepository |
+| FR-014 | 폴더 삭제 | U_05 | Folder, DeletedFile, Permission | 폴더 관리 화면, MetadataRepository |
+| FR-015 | 파일 폴더 간 이동 | U_05 | File, Folder, FileMetadata, Permission | 폴더 관리 화면, MetadataRepository |
+| FR-016 | 파일명 변경 | U_05 | File, FileMetadata, Permission | 파일 목록 화면, MetadataRepository |
+| FR-017 | 다단계 폴더 구조 지원 | U_05 | Folder | 폴더 관리 화면, MetadataRepository |
+| FR-018 | 파일명 기준 검색 | U_06 | FileMetadata, Permission | 검색 화면, MetadataRepository |
+| FR-019 | 파일 유형 기준 검색 | U_06 | FileMetadata, Permission | 검색 화면, MetadataRepository |
+| FR-020 | 업로드 날짜 기준 검색 | U_06 | FileMetadata, Permission | 검색 화면, MetadataRepository |
+| FR-021 | 업로더 기준 검색 | U_06 | FileMetadata, User, Permission | 검색 화면, MetadataRepository |
+| FR-022 | 검색 결과 목록 제공 | U_06 | FileMetadata, Permission | 검색 화면, MetadataRepository |
+| FR-023 | 검색 결과에서 파일 위치와 기본 정보 확인 | U_06 | FileMetadata, Folder | 검색 화면, MetadataRepository |
+| FR-024 | 내부 사용자에게 파일 또는 폴더 공유 | U_07 | Permission, User, File, Folder, AccessLog | 공유 설정 화면, AuthService, AccessLogService |
+| FR-025 | 보기, 수정 권한 구분 | U_07, U_11 | Permission, User, Admin | 공유 설정 화면, 관리자 화면, AuthService |
+| FR-026 | 외부 링크 생성 | U_08 | ShareLink, File, Policy, AccessLog | 공유 설정 화면, ShareLinkService, AccessLogService |
+| FR-027 | 외부 링크 만료 기간 설정 | U_08, U_13 | ShareLink, Policy | 공유 설정 화면, ShareLinkService, PolicyService |
+| FR-028 | 외부 링크 다운로드 허용 여부 설정 | U_08, U_13 | ShareLink, Policy | 공유 설정 화면, ShareLinkService, PolicyService |
+| FR-029 | 만료된 외부 링크 접근 차단 | U_13 | ShareLink, Policy, AccessLog | 외부 링크 접근 화면, ShareLinkService, AccessLogService |
+| FR-030 | 파일 수정 이력 기반 버전 저장 | U_09 | FileVersion, File, Storage | VersionService, StorageService |
+| FR-031 | 이전 버전 목록 확인 | U_09 | FileVersion, Permission | 버전 관리 화면, VersionService |
+| FR-032 | 이전 버전 다운로드 | U_09 | FileVersion, Storage, Permission | 버전 관리 화면, VersionService, StorageService |
+| FR-033 | 이전 버전으로 복원 | U_09 | FileVersion, File, Storage | 버전 관리 화면, VersionService, StorageService |
+| FR-034 | 삭제 파일 일정 기간 복구 | U_10 | DeletedFile, File, Storage, Policy | 휴지통 화면, StorageService, PolicyService |
+| FR-035 | 사용자 권한 설정 및 변경 | U_11 | Admin, User, Permission, AccessLog | 관리자 화면, AuthService, AccessLogService |
+| FR-036 | 저장 공간 및 공유 정책 관리 | U_11 | Admin, Policy | 관리자 화면, PolicyService |
+| FR-037 | 외부 링크 공유 정책 통제 | U_08, U_11, U_13 | Policy, ShareLink, Admin | 관리자 화면, ShareLinkService, PolicyService |
+| FR-038 | 권한 없는 사용자 접근 차단 | U_02, U_04, U_05, U_06, U_07, U_08, U_09, U_10, U_13 | Permission, User, ShareLink | AuthService, ShareLinkService |
+| FR-039 | 파일 접근 및 공유 로그 기록 | U_04, U_07, U_08, U_11, U_12, U_13 | AccessLog, File, ShareLink, Admin | AccessLogService |
+| NFR-004 | 검색 결과 2초 이내 표시 | U_06 | FileMetadata, Permission | 검색 화면, MetadataRepository |
+| NFR-005 | 다운로드 요청 후 3초 이내 전송 시작 | U_04, U_13 | File, Storage, ShareLink | StorageService, ShareLinkService |
+| NFR-007 | 대용량 업로드 진행률 1초 이내 갱신 | U_03 | File, Storage | 파일 업로드 화면, StorageService |
+| NFR-008 | 업로드 성공률 99% 이상 목표 | U_03 | File, Storage, Policy | StorageService, PolicyService |
+| NFR-009 | 삭제 파일 30일 이내 복구 가능 | U_10 | DeletedFile, Policy | 휴지통 화면, PolicyService |
+| NFR-010 | 이전 버전 복원 성공률 95% 이상 | U_09 | FileVersion, File, Storage | VersionService, StorageService |
+| NFR-012 | 권한 없는 사용자 접근 성공률 0% | U_02, U_04, U_05, U_06, U_07, U_08, U_09, U_10, U_13 | Permission, ShareLink, Policy | AuthService, ShareLinkService |
+| NFR-013 | 외부 공유 링크 100% 만료 처리 | U_08, U_13 | ShareLink, Policy | ShareLinkService, PolicyService |
+| IR-001 | 웹 브라우저 기반 UI 제공 | U_01~U_13 | User, Admin, ExternalUser | 회원가입/로그인/파일/관리자/외부 링크 화면 |
+| IR-003 | 업로드 진행률 표시 UI 제공 | U_03 | File, Storage | 파일 업로드 화면, StorageService |
+| IR-004 | 검색 결과 목록 UI 제공 | U_06 | FileMetadata, Permission | 검색 화면, MetadataRepository |
+| IR-006 | 관리자 전용 UI 제공 | U_11, U_12 | Admin, User, Permission, AccessLog | 관리자 화면 |
+| IR-007 | 데이터베이스 연동 | U_01~U_13 | User, FileMetadata, Permission, FileVersion, AccessLog, Policy | UserRepository, MetadataRepository, AccessLogService, PolicyService |
+| IR-009 | 외부 링크 URL 생성 및 검증 | U_08, U_13 | ShareLink, Policy, AccessLog | ShareLinkService, AccessLogService |
+| IR-010 | 업로드, 다운로드, 검색, 공유 서버 인터페이스 | U_03, U_04, U_06, U_07, U_08, U_13 | File, Storage, FileMetadata, Permission, ShareLink | StorageService, MetadataRepository, ShareLinkService |
 
 ---
 
@@ -1947,4 +1952,4 @@ sequenceDiagram
 
 본 문서의 유스케이스 설명서, CRC 카드, 정적 분석, 동적 분석은 요구사항 정의서에 작성된 기능적 요구사항, 비기능적 요구사항, 인터페이스 요구사항을 기반으로 작성하였다.
 
-향후 소프트웨어 설계서 작성 시 본 문서에서 도출한 클래스, 책임, 객체 간 관계, 순차 흐름을 기준으로 상세 설계를 진행한다.
+향후 소프트웨어 설계서 작성 시 본 문서에서 도출한 클래스, 책임, 객체 간 관계, 순차 흐름을 기준으로 상세 설계를 진행한다. 또한 본 문서의 요구사항 추적표에서 연결한 관련 클래스와 주요 인터페이스를 바탕으로 상세 설계 단계의 모듈, API, 데이터 저장 구조를 구체화한다.
