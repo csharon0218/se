@@ -18,6 +18,7 @@
 | 1.3 | 2026-05-09 | 최민서 | 관리자 정책 관리 Subflow 보완, 주요 시퀀스 다이어그램 예외 흐름 추가 | 수정 |
 | 1.4 | 2026-05-09 | 최민서 | Mermaid Sequence Diagram 렌더링 오류 수정 | 수정 |
 | 1.5 | 2026-05-16 | 최민서 | CRC 카드와 클래스 다이어그램 간 FileMetadata-Folder 관계 일관성 보완 | 수정 |
+| 1.6 | 2026-05-18 | 최민서 | FileMetadata 및 FileVersion CRC 카드의 Aggregation 관계 모순 수정 | 수정 |
 
 ---
 
@@ -1217,8 +1218,8 @@ classDiagram
 **Relationships**
 
 - Generalization: 없음
-- Aggregation: File
-- Other Associations: Folder, User
+- Aggregation: 없음
+- Other Associations: File, Folder, User
 
 ---
 
@@ -1317,8 +1318,8 @@ classDiagram
 **Relationships**
 
 - Generalization: 없음
-- Aggregation: File
-- Other Associations: User, Storage
+- Aggregation: 없음
+- Other Associations: File, User, Storage
 
 ---
 
