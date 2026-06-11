@@ -35,16 +35,15 @@ SyncSpace는 조직 내부에서 파일을 안전하고 효율적으로 저장, 
 
 소프트웨어공학 과제 결과물은 아래 위치에서 확인할 수 있습니다.
 
-- **프로젝트 I 제안서**: [doc/proposal.md](./doc/proposal.md)
-- **프로젝트 II 품질 요소 추정서**: [doc/project2.md](./doc/project2.md)
-- **프로젝트 III 프로젝트 관리 계획서**: [doc/project_plan.md](./doc/project_plan.md)
-- **프로젝트 IV 요구사항 정의서**: [doc/requirements.md](./doc/requirements.md)
-- **프로젝트 VII 요구사항 분석서**: [doc/requirements_analysis.md](./doc/requirements_analysis.md)
-- **프로젝트 설명 문서**: [README.md](./README.md)
-
-추후 아래 산출물이 추가되면 README에도 계속 반영합니다.
-
-- **소프트웨어 설계서**: `doc/software_design.md` 예정
+| 구분 | 문서명 | 파일 위치 | 상태 |
+|---|---|---|---|
+| 프로젝트 I | 제안서 | [doc/proposal.md](./doc/proposal.md) | 완료 |
+| 프로젝트 II | 품질 요소 추정서 | [doc/project2.md](./doc/project2.md) | 완료 |
+| 프로젝트 III | 프로젝트 관리 계획서 | [doc/project_plan.md](./doc/project_plan.md) | 완료 |
+| 프로젝트 IV | 요구사항 정의서 | [doc/requirements.md](./doc/requirements.md) | 완료 |
+| 프로젝트 VII | 요구사항 분석서 | [doc/requirements_analysis.md](./doc/requirements_analysis.md) | 완료 |
+| 테스트 결과 보고서 | 요구사항 기반 테스트 결과 보고서 | [doc/result_report.md](./doc/result_report.md) | 완료 |
+| 프로젝트 설명 문서 | README | [README.md](./README.md) | 완료 |
 
 ---
 
@@ -59,5 +58,6 @@ se/
 │   ├── project_plan.md
 │   ├── requirements.md
 │   ├── requirements_analysis.md
-│   └── software_design.md            # 추후 추가
+│   ├── result_report.md
 └── src/
+```
